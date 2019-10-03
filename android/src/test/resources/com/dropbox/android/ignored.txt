@@ -1,0 +1,1 @@
+This file shouldn't be counted by the allowed list filter
