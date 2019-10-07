@@ -5,9 +5,6 @@ plugins {
     id "com.vanniktech.maven.publish" version "0.8.0"
 }
 
-group 'com.dropbox.android'
-version '1.0.0-SNAPSHOT'
-
 repositories {
     mavenCentral()
     google()
