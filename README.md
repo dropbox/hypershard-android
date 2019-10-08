@@ -7,3 +7,5 @@ Apps that have a significant number of UI tests â€“ like Paper or Dropbox apps â
 Java/Kotlin/Android is available
 
 Swift/iOS coming soon
+
+[![Build Status](https://travis-ci.org/dropbox/hypershard.svg?branch=master)](https://travis-ci.org/dropbox/hypershard)
