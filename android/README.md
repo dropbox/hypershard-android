@@ -17,7 +17,7 @@ Snapshots of the development version are available in [Sonatype's `snapshots` re
 # Usage
 The argument is a vararg, you can pass in as many directories as you want, separated by spaces
 ```
-java -jar hypershard-1.0.0-all.jar UiTest /Users/changd/dev/xplat/android/dbapp/Dropbox/test/src/uitests
+java -jar hypershard-1.0.0.jar UiTest /Users/changd/dev/xplat/android/dbapp/Dropbox/test/src/uitests
 ```
 The output is a list of fully qualified tests separated by new lines.
 
