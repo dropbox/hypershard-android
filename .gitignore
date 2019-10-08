@@ -57,6 +57,7 @@ fabric.properties
 
 # Package Files #
 *.jar
+!gradle-wrapper.jar
 *.war
 *.nar
 *.ear
@@ -167,7 +168,5 @@ Thumbs.db
 # Crashlytics plugin (for Android Studio and IntelliJ)
 
 ### AndroidStudio Patch ###
-
-!/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.gitignore.io/api/java,kotlin,intellij,androidstudio
