@@ -1,3 +1,5 @@
+language: minimal
+
 matrix:
   include:
     - language: java
