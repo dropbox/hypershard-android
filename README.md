@@ -1,5 +1,7 @@
 # About
-Hypershard is a fast and simple test collector that works on Java and Kotlin source files. Using Hypershard, we are able to send a subset of the tests to separate nodes.
+A fast and easy CLI tool that leverages AST (Abstract Syntax Tree) to parse test files for the purposes of test collection.
+
+Apps that have a significant number of UI tests – like Paper or Dropbox apps – need to be sharded to run efficiently on CI. Unfortunately, UI test sharding generally requires you to build the entire application. Hypershard removes this first build by performing analysis of the Abstract Syntax Tree to output the list of all available tests.
 
 At Dropbox, we run Android UI tests separately from JVM tests. Using historical data, we shard our UI tests such that each shard is balanced e.g. each shard ends approximately at the same time.
 
