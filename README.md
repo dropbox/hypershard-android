@@ -7,7 +7,7 @@ At Dropbox, we run Android UI tests separately from JVM tests. Using historical 
 
 We do this by running tests using [ADB Instrumentation test options](https://developer.android.com/reference/android/support/test/runner/AndroidJUnitRunner) `-e testFile` where each shard has its own list of tests.
 
-[![Build Status](https://travis-ci.org/dropbox/hypershard.svg?branch=master)](https://travis-ci.org/dropbox/hypershard)
+[![Build Status](https://travis-ci.org/dropbox/hypershard.svg?branch=master)](https://travis-ci.org/dropbox/hypershard-android)
 
 # Download
 ```groovy
