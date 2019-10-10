@@ -12,6 +12,10 @@ repositories {
     jcenter()
 }
 
+ktlint {
+    version = "0.34.2"
+}
+
 dependencies {
     // This includes the kotlin runtime in to the fat jar
     implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.6.25'
