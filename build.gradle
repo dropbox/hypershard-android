@@ -3,12 +3,17 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.50'
     id 'com.github.johnrengelman.shadow' version '4.0.1'
     id "com.vanniktech.maven.publish" version "0.8.0"
+    id "org.jlleitschuh.gradle.ktlint" version "9.0.0"
 }
 
 repositories {
     mavenCentral()
     google()
     jcenter()
+}
+
+ktlint {
+    version = "0.34.2"
 }
 
 dependencies {
