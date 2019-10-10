@@ -12,7 +12,7 @@ matrix:
           - $HOME/.gradle/caches/
           - $HOME/.gradle/wrapper/
       script:
-      - "cd android && ./gradlew clean check test --stacktrace"
+        - "./gradlew clean test --stacktrace"
 
       notifications:
         email: false
