@@ -31,6 +31,8 @@ java -jar hypershard-1.0.0.jar $annotation $path
 ```
 The output is a list of fully qualified tests separated by new lines.
 
+Here's an [example Python script](example/run_hypershard.py) that uses Hypershard as a CLI tool.
+
 # Building
 This command will build the jar with dependencies
 ```
