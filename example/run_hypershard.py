@@ -7,23 +7,23 @@ if __name__ == "__main__":
     Shows usage of Hypershard as a CLI tool
 
     Input:
-    java -jar hypershard.jar UiTest src/test/resources
+        java -jar hypershard.jar UiTest src/test/resources
     Output:
-    com.dropbox.android.java.FakeIgnoredClassTest.emptyTest1
-    com.dropbox.android.java.FakeIgnoredClassTest.emptyTest2
-    com.dropbox.android.java.FakeIgnoredMethodTest.emptyTest1
-    com.dropbox.android.java.FakeIgnoredMethodTest.emptyTest2
-    com.dropbox.android.kotlin.FakeIgnoredClassTest.emptyTest1
-    com.dropbox.android.kotlin.FakeIgnoredClassTest.emptyTest2
-    com.dropbox.android.kotlin.FakeIgnoredMethodTest.emptyTest1
-    com.dropbox.android.kotlin.FakeIgnoredMethodTest.emptyTest2
-    com.dropbox.android.kotlin.FakeIgnoredMethodTest.emptyTest3
+        com.dropbox.android.java.FakeIgnoredClassTest.emptyTest1
+        com.dropbox.android.java.FakeIgnoredClassTest.emptyTest2
+        com.dropbox.android.java.FakeIgnoredMethodTest.emptyTest1
+        com.dropbox.android.java.FakeIgnoredMethodTest.emptyTest2
+        com.dropbox.android.kotlin.FakeIgnoredClassTest.emptyTest1
+        com.dropbox.android.kotlin.FakeIgnoredClassTest.emptyTest2
+        com.dropbox.android.kotlin.FakeIgnoredMethodTest.emptyTest1
+        com.dropbox.android.kotlin.FakeIgnoredMethodTest.emptyTest2
+        com.dropbox.android.kotlin.FakeIgnoredMethodTest.emptyTest3
     '''
     file_name = "hypershard.jar"
 
     if not os.path.isfile(file_name):    
-        testfile = urllib.URLopener()
-        testfile.retrieve("https://search.maven.org/remotecontent?filepath=com/dropbox/mobile/hypershard/hypershard/1.0.0/hypershard-1.0.0.jar", file_name)
+        url_opener = urllib.URLopener()
+        url_opener.retrieve("https://search.maven.org/remotecontent?filepath=com/dropbox/mobile/hypershard/hypershard/1.0.0/hypershard-1.0.0.jar", file_name)
     hypershard_command = "java -jar hypershard.jar UiTest src/test/resources"
     print "Input: \n", hypershard_command
     output = subprocess.check_output(hypershard_command.split())
