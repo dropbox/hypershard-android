@@ -11,7 +11,7 @@ class HypershardTest {
 
     init {
         val file = File(resources).also { checkNotNull(it.absoluteFile) }
-        hypershard = RealHyperShard(AnnotationValue.Present("UiTest"), listOf(resources))
+        hypershard = RealHyperShard(ClassAnnotationValue.Present("UiTest"), listOf(resources))
         files = hypershard.getFiles(file, ALLOWED_EXTENSIONS)
     }
 
@@ -69,7 +69,7 @@ class HypershardTest {
 
     @Test
     fun `GIVEN tests WHEN gathering all tests THEN tests found`() {
-        val hypershard = RealHyperShard(AnnotationValue.Empty(), listOf(resources))
+        val hypershard = RealHyperShard(ClassAnnotationValue.Empty(), listOf(resources))
         val tests = hypershard.gatherTests()
         assertThat(tests.size).`as`("Test cases found does not match expected: $tests")
             .isEqualTo(13)

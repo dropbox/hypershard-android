@@ -47,7 +47,7 @@ interface HyperShard {
  * @property dirs list of directories to parse. Hypershard will walk down from the root.
  */
 class RealHyperShard(
-    private val annotationValue: AnnotationValue,
+    private val annotationValue: ClassAnnotationValue,
     private val dirs: List<String>
 ) : HyperShard {
 
@@ -159,15 +159,15 @@ class RealHyperShard(
      */
     private fun shouldProcessTestMethods(
         classOrInterfaceDeclaration: ClassOrInterfaceDeclaration,
-        annotationValue: AnnotationValue
+        annotationValue: ClassAnnotationValue
     ): Boolean {
         return when (annotationValue) {
-            is AnnotationValue.Present -> {
+            is ClassAnnotationValue.Present -> {
                 val annotationUiTest =
                     classOrInterfaceDeclaration.getAnnotationByName(annotationValue.annotationName)
                 annotationUiTest.isPresent
             }
-            is AnnotationValue.Empty -> true
+            is ClassAnnotationValue.Empty -> true
         }
     }
 
@@ -224,10 +224,10 @@ class RealHyperShard(
      */
     private fun shouldProcessTestMethods(
         ktClass: KtClass,
-        annotationValue: AnnotationValue
+        annotationValue: ClassAnnotationValue
     ): Boolean {
-        val shouldProcessTestMethods = when (annotationValue) {
-            is AnnotationValue.Present -> {
+        return when (annotationValue) {
+            is ClassAnnotationValue.Present -> {
                 var found = false
                 for (annotationEntry in ktClass.annotationEntries) {
                     if (annotationEntry.shortName.toString() == annotationValue.annotationName) {
@@ -237,12 +237,14 @@ class RealHyperShard(
                 }
                 found
             }
-            is AnnotationValue.Empty -> true
+            is ClassAnnotationValue.Empty -> true
         }
-        return shouldProcessTestMethods
     }
 }
 
+/**
+ * Entry point for Hypershard CLI
+ */
 class HypershardCommand :
     CliktCommand(
         help = "Hypershard is a fast and simple test collector that uses the Kotlin and Java " +
@@ -261,8 +263,8 @@ class HypershardCommand :
 
     override fun run() {
         val annotationValue = when (annotationName) {
-            "" -> AnnotationValue.Empty()
-            else -> AnnotationValue.Present(annotationName)
+            "" -> ClassAnnotationValue.Empty()
+            else -> ClassAnnotationValue.Present(annotationName)
         }
         val hyperShard = RealHyperShard(annotationValue, dirs)
         hyperShard.gatherTests().stream().forEach(::println)
