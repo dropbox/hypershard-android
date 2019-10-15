@@ -10,20 +10,20 @@ We do this by running tests using [ADB Instrumentation test options](https://dev
 [![Build Status](https://travis-ci.org/dropbox/hypershard-android.svg?branch=master)](https://travis-ci.org/dropbox/hypershard-android)
 
 # Download
-The jar is executable and can be downloaded from Maven Central: https://search.maven.org/search?q=g:com.dropbox.mobile.hypershard
+The jar is executable and can be downloaded from [Maven Central](https://search.maven.org/search?q=g:com.dropbox.mobile.hypershard)
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/).
 
 Another use case could be to use Hypershard as a dependency in your project
 
 ```groovy
-implementation 'com.dropbox.mobile.hypershard:hypershard:x.y.z'
+implementation 'com.dropbox.mobile.hypershard:hypershard:1.1.0'
 ```
 
 
 # Usage
 ```
-java -jar hypershard-*.jar --help
+java -jar hypershard-1.1.0.jar --help
 ```
 
 Here's an [example Python script](example/run_hypershard.py) that uses Hypershard as a CLI tool.
