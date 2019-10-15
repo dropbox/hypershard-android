@@ -24,6 +24,8 @@ if __name__ == "__main__":
     if not os.path.isfile(file_name):    
         url_opener = urllib.URLopener()
         url_opener.retrieve("https://search.maven.org/remotecontent?filepath=com/dropbox/mobile/hypershard/hypershard/1.0.0/hypershard-1.0.0.jar", file_name)
+
+    # TODO Update after 1.0.1 is uploaded
     hypershard_command = "java -jar hypershard.jar UiTest src/test/resources"
     print "Input: \n", hypershard_command
     output = subprocess.check_output(hypershard_command.split())

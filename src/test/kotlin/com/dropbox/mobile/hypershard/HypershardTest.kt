@@ -6,68 +6,72 @@ import org.assertj.core.api.Assertions.assertThat
 
 class HypershardTest {
     private val resources = "src/test/resources"
-    private val processor: RealHyperShard
+    private val hypershard: RealHyperShard
     private val files: Set<File>
 
     init {
         val file = File(resources).also { checkNotNull(it.absoluteFile) }
-        processor = RealHyperShard("UiTest", arrayOf(resources))
-        files = processor.getFiles(file, ALLOWED_EXTENSIONS)
+        hypershard = RealHyperShard(AnnotationValue.Present("UiTest"), listOf(resources))
+        files = hypershard.getFiles(file, ALLOWED_EXTENSIONS)
     }
 
     @Test
-    fun getFiles() {
-        assertThat(files.size).isEqualTo(4)
+    fun `GIVEN hypershard WHEN get all files THEN all are found`() {
+        assertThat(files.size).isEqualTo(6)
     }
 
     @Test
-    fun test_GIVEN_files_WHEN_filter_swift_THEN_no_results() {
-        assertThat(processor.filterFiles(".swift", files)).isEmpty()
+    fun `GIVEN files WHEN filter swift THEN no results`() {
+        assertThat(hypershard.filterFiles(".swift", files)).isEmpty()
     }
 
     @Test
-    fun test_GIVEN_files_WHEN_filter_java_THEN_results_found() {
-        assertThat(processor.filterFiles(".java", files).size).isEqualTo(2)
+    fun `GIVEN files WHEN filter java THEN results found`() {
+        assertThat(hypershard.filterFiles(".java", files).size).isEqualTo(3)
     }
 
     @Test
-    fun test_GIVEN_files_WHEN_filter_kt_THEN_results_found() {
-        assertThat(processor.filterFiles(".kt", files).size).isEqualTo(2)
+    fun `GIVEN files WHEN filter kt THEN results found`() {
+        assertThat(hypershard.filterFiles(".kt", files).size).isEqualTo(3)
     }
 
     @Test
-    fun test_GIVEN_files_WHEN_processing_java_then_tests_found() {
+    fun `GIVEN files WHEN processing java UiTest THEN tests found`() {
         val tests = mutableListOf<String>()
         with(tests) {
             addAll(arrayListOf())
         }
-        val javaFiles = processor.filterFiles(".java", files)
+        val javaFiles = hypershard.filterFiles(".java", files)
         for (file in javaFiles) {
-            tests.addAll(processor.collectTestsFromJavaFile(file))
+            tests.addAll(hypershard.collectTestsFromJavaFile(file))
         }
         assertThat(tests.size).`as`("Test cases found does not match expected: $tests").isEqualTo(4)
     }
 
     @Test
-    fun test_GIVEN_files_WHEN_processing_kt_then_tests_found() {
+    fun `GIVEN files WHEN processing kt UiTest THEN tests found`() {
         val tests = mutableListOf<String>()
         with(tests) {
             addAll(arrayListOf())
         }
-        val kotlinFiles = processor.filterFiles(".kt", files)
+        val kotlinFiles = hypershard.filterFiles(".kt", files)
         for (file in kotlinFiles) {
-            tests.addAll(processor.collectTestsFromKotlinFile(file))
+            tests.addAll(hypershard.collectTestsFromKotlinFile(file))
         }
         assertThat(tests.size).`as`("Test cases found does not match expected: $tests").isEqualTo(5)
     }
 
     @Test
-    fun test_GIVEN_tests_WHEN_gathering_all_tests_THEN_tests_found() {
-        val tests = processor.gatherTests()
+    fun `GIVEN tests WHEN gathering all UiTest THEN tests found`() {
+        val tests = hypershard.gatherTests()
         assertThat(tests.size).`as`("Test cases found does not match expected: $tests").isEqualTo(9)
+    }
 
-        for (test in tests) {
-            assertThat(test).doesNotContain("#")
-        }
+    @Test
+    fun `GIVEN tests WHEN gathering all tests THEN tests found`() {
+        val hypershard = RealHyperShard(AnnotationValue.Empty(), listOf(resources))
+        val tests = hypershard.gatherTests()
+        assertThat(tests.size).`as`("Test cases found does not match expected: $tests")
+            .isEqualTo(13)
     }
 }

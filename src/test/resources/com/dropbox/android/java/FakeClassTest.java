@@ -13,10 +13,8 @@ import org.junit.runner.RunWith;
 /**
  * A deliberately ignored class with a few tests inside
  */
-@UiTest
-@Ignore
 @RunWith(AndroidJUnit4.class)
-public class FakeIgnoredClassTest {
+public class FakeIgnoredClassUiTest {
     /**
      * lint needs a javadoc comment
      */
