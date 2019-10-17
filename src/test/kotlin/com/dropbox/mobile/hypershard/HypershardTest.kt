@@ -1,13 +1,39 @@
 package com.dropbox.mobile.hypershard
 
+import com.google.common.truth.Truth.assertThat
 import java.io.File
 import kotlin.test.Test
-import org.assertj.core.api.Assertions.assertThat
 
 class HypershardTest {
     private val resources = "src/test/resources"
     private val hypershard: RealHyperShard
     private val files: Set<File>
+
+    companion object {
+        private val expectedJavaUiTests = listOf(
+            "com.dropbox.android.java.FakeIgnoredMethodUiTest.emptyTest1",
+            "com.dropbox.android.java.FakeIgnoredMethodUiTest.emptyTest2",
+            "com.dropbox.android.java.FakeIgnoredClassUiTest.emptyTest1",
+            "com.dropbox.android.java.FakeIgnoredClassUiTest.emptyTest2"
+        )
+
+        private val expectedKotlinUiTests = listOf(
+            "com.dropbox.android.kotlin.FakeIgnoredClassUiTest.emptyTest1",
+            "com.dropbox.android.kotlin.FakeIgnoredClassUiTest.emptyTest2",
+            "com.dropbox.android.kotlin.FakeIgnoredMethodUiTest.emptyTest1",
+            "com.dropbox.android.kotlin.FakeIgnoredMethodUiTest.emptyTest2",
+            "com.dropbox.android.kotlin.FakeIgnoredMethodUiTest.emptyTest3"
+        )
+
+        private val expectedUiTests = expectedJavaUiTests + expectedKotlinUiTests
+        private val expectedNonUiTests = listOf(
+            "com.dropbox.android.java.FakeIgnoredClassTest.emptyTest1",
+            "com.dropbox.android.java.FakeIgnoredClassTest.emptyTest2",
+            "com.dropbox.android.kotlin.FakeClassTest.emptyTest1",
+            "com.dropbox.android.kotlin.FakeClassTest.emptyTest2"
+        )
+        private val allTests = expectedUiTests + expectedNonUiTests
+    }
 
     init {
         val file = File(resources).also { checkNotNull(it.absoluteFile) }
@@ -45,7 +71,8 @@ class HypershardTest {
         for (file in javaFiles) {
             tests.addAll(hypershard.collectTestsFromJavaFile(file))
         }
-        assertThat(tests.size).`as`("Test cases found does not match expected: $tests").isEqualTo(4)
+        assertThat(tests.size).isEqualTo(4)
+        assertThat(tests).containsExactlyElementsIn(expectedJavaUiTests)
     }
 
     @Test
@@ -58,20 +85,24 @@ class HypershardTest {
         for (file in kotlinFiles) {
             tests.addAll(hypershard.collectTestsFromKotlinFile(file))
         }
-        assertThat(tests.size).`as`("Test cases found does not match expected: $tests").isEqualTo(5)
+        assertThat(tests.size).isEqualTo(5)
+        assertThat(tests).containsExactlyElementsIn(expectedKotlinUiTests)
     }
 
     @Test
     fun `GIVEN tests WHEN gathering all UiTest THEN tests found`() {
+
         val tests = hypershard.gatherTests()
-        assertThat(tests.size).`as`("Test cases found does not match expected: $tests").isEqualTo(9)
+        assertThat(tests.size).isEqualTo(9)
+        assertThat(tests).containsExactlyElementsIn(expectedUiTests)
     }
 
     @Test
     fun `GIVEN tests WHEN gathering all tests THEN tests found`() {
-        val hypershard = RealHyperShard(ClassAnnotationValue.Empty(), listOf(resources))
+        val expectedTests = emptyList<String>()
+        val hypershard = RealHyperShard(ClassAnnotationValue.Empty, listOf(resources))
         val tests = hypershard.gatherTests()
-        assertThat(tests.size).`as`("Test cases found does not match expected: $tests")
-            .isEqualTo(13)
+        assertThat(tests.size).isEqualTo(13)
+        assertThat(tests).containsExactlyElementsIn(allTests)
     }
 }

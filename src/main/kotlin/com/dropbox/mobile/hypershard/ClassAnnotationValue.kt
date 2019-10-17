@@ -5,6 +5,6 @@ package com.dropbox.mobile.hypershard
  *
  */
 sealed class ClassAnnotationValue {
-    class Present(val annotationName: String) : ClassAnnotationValue()
-    class Empty : ClassAnnotationValue()
+    data class Present(val annotationName: String) : ClassAnnotationValue()
+    object Empty : ClassAnnotationValue()
 }

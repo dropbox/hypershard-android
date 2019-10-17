@@ -136,13 +136,8 @@ class RealHyperShard(
                         for (method in methods) {
                             val annotationTest = method.getAnnotationByName("Test")
                             if (annotationTest.isPresent) {
-                                tests.add(
-                                    String.format(
-                                        "%s.%s.%s",
-                                        cu.packageDeclaration.get().name,
-                                        type.name,
-                                        method.name
-                                    )
+                                tests.add("${cu.packageDeclaration.get().name}." +
+                                    "${type.name}.${method.name}"
                                 )
                             }
                         }
@@ -228,14 +223,12 @@ class RealHyperShard(
     ): Boolean {
         return when (annotationValue) {
             is ClassAnnotationValue.Present -> {
-                var found = false
                 for (annotationEntry in ktClass.annotationEntries) {
                     if (annotationEntry.shortName.toString() == annotationValue.annotationName) {
-                        found = true
-                        break
+                        return true
                     }
                 }
-                found
+                return false
             }
             is ClassAnnotationValue.Empty -> true
         }
@@ -263,11 +256,11 @@ class HypershardCommand :
 
     override fun run() {
         val annotationValue = when (annotationName) {
-            "" -> ClassAnnotationValue.Empty()
+            "" -> ClassAnnotationValue.Empty
             else -> ClassAnnotationValue.Present(annotationName)
         }
         val hyperShard = RealHyperShard(annotationValue, dirs)
-        hyperShard.gatherTests().stream().forEach(::println)
+        hyperShard.gatherTests().forEach(::println)
     }
 }
 
