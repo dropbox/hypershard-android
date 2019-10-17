@@ -11,12 +11,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * A deliberately ignored class with a few tests inside
+ * A class with ignored methods, parser should find 2 valid tests
  */
 @UiTest
-@Ignore
 @RunWith(AndroidJUnit4.class)
-public class FakeIgnoredClassTest {
+public class FakeIgnoredMethodUiTest {
     /**
      * lint needs a javadoc comment
      */
@@ -26,6 +25,7 @@ public class FakeIgnoredClassTest {
     /**
      * lint needs a javadoc comment
      */
+    @Ignore
     @Test
     public void emptyTest2() {}
 }

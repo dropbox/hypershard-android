@@ -6,17 +6,16 @@ package com.dropbox.android.kotlin
 
 import android.support.test.runner.AndroidJUnit4
 import com.dropbox.core.test.ui_runner.annotations.UiTest
-import jdk.nashorn.internal.ir.annotations.Ignore
 import kotlin.test.Test
 import org.junit.Ignore
 import org.junit.runner.RunWith
 
 /**
- * A class with ignored methods, parser should find 1 valid test
+ * A class with ignored methods, parser should find 3 valid tests
  */
 @UiTest
 @RunWith(AndroidJUnit4::class)
-class FakeIgnoredMethodTest {
+class FakeIgnoredMethodUiTest {
     /**
      * lint needs a javadoc comment
      */

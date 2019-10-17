@@ -3,6 +3,11 @@
  */
 package com.dropbox.mobile.hypershard
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.multiple
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
@@ -38,20 +43,18 @@ interface HyperShard {
 /**
  * @see [HyperShard]
  *
- * @property annotationName annotation name at the class level e.g. UiTest (@ not needed)
+ * @property annotationValue annotation name at the class level e.g. UiTest (@ not needed)
  * @property dirs list of directories to parse. Hypershard will walk down from the root.
  */
 class RealHyperShard(
-    private val annotationName: String,
-    private val dirs: Array<String>
+    private val annotationValue: ClassAnnotationValue,
+    private val dirs: List<String>
 ) : HyperShard {
 
     /**
      * @see [HyperShard.gatherTests]
      */
     override fun gatherTests(): List<String> {
-        checkUsage(dirs)
-
         val tests = mutableListOf<String>()
         for (dir in dirs) {
             val projectDir = File(dir)
@@ -125,20 +128,17 @@ class RealHyperShard(
                 val types = cu.types
                 for (type in types) {
                     val classOrInterfaceDeclaration =
-                            type as? ClassOrInterfaceDeclaration ?: continue
-
-                    val annotationUiTest =
-                            classOrInterfaceDeclaration.getAnnotationByName(annotationName)
-                    if (annotationUiTest.isPresent) {
+                        type as? ClassOrInterfaceDeclaration ?: continue
+                    val shouldProcessTestMethod =
+                        shouldProcessTestMethods(classOrInterfaceDeclaration, annotationValue)
+                    if (shouldProcessTestMethod) {
                         val methods = type.methods
                         for (method in methods) {
                             val annotationTest = method.getAnnotationByName("Test")
                             if (annotationTest.isPresent) {
-                                tests.add(
-                                        String.format("%s.%s.%s",
-                                                cu.packageDeclaration.get().name,
-                                                type.name,
-                                                method.name))
+                                tests.add("${cu.packageDeclaration.get().name}." +
+                                    "${type.name}.${method.name}"
+                                )
                             }
                         }
                     }
@@ -147,6 +147,23 @@ class RealHyperShard(
         }.visit(JavaParser.parse(file), null)
 
         return tests
+    }
+
+    /**
+     * Returns true if we found the class annotation or if's meant to be empty
+     */
+    private fun shouldProcessTestMethods(
+        classOrInterfaceDeclaration: ClassOrInterfaceDeclaration,
+        annotationValue: ClassAnnotationValue
+    ): Boolean {
+        return when (annotationValue) {
+            is ClassAnnotationValue.Present -> {
+                val annotationUiTest =
+                    classOrInterfaceDeclaration.getAnnotationByName(annotationValue.annotationName)
+                annotationUiTest.isPresent
+            }
+            is ClassAnnotationValue.Empty -> true
+        }
     }
 
     /**
@@ -167,14 +184,8 @@ class RealHyperShard(
         for (declaration in allDeclarations) {
             val ktClass = declaration as? KtClass ?: continue
 
-            var uiTestFound = false
-            for (annotationEntry in ktClass.annotationEntries) {
-                if (annotationEntry.shortName.toString() == annotationName) {
-                    uiTestFound = true
-                    break
-                }
-            }
-            if (!uiTestFound) {
+            val shouldProcessTestMethods = shouldProcessTestMethods(ktClass, annotationValue)
+            if (!shouldProcessTestMethods) {
                 continue
             }
 
@@ -202,20 +213,57 @@ class RealHyperShard(
         }
         return tests
     }
+
+    /**
+     * Returns true if we found the class annotation or if's meant to be empty
+     */
+    private fun shouldProcessTestMethods(
+        ktClass: KtClass,
+        annotationValue: ClassAnnotationValue
+    ): Boolean {
+        return when (annotationValue) {
+            is ClassAnnotationValue.Present -> {
+                for (annotationEntry in ktClass.annotationEntries) {
+                    if (annotationEntry.shortName.toString() == annotationValue.annotationName) {
+                        return true
+                    }
+                }
+                return false
+            }
+            is ClassAnnotationValue.Empty -> true
+        }
+    }
+}
+
+/**
+ * Entry point for Hypershard CLI
+ */
+class HypershardCommand :
+    CliktCommand(
+        help = "Hypershard is a fast and simple test collector that uses the Kotlin and Java " +
+            "ASTs. Hypershard CLI will print full qualified test names found in dir(s)."
+    ) {
+    val annotationName by option(
+        help = "Class annotation name to process. For example, if this was set to 'UiTest', " +
+            "then Hypershard will only process classes annotated with @UiTest."
+    )
+        .default("")
+    val dirs by argument(
+        name = "dirs", help = "Dir(s) to process. " +
+            "The location of the test classes to parse"
+    )
+        .multiple()
+
+    override fun run() {
+        val annotationValue = when (annotationName) {
+            "" -> ClassAnnotationValue.Empty
+            else -> ClassAnnotationValue.Present(annotationName)
+        }
+        val hyperShard = RealHyperShard(annotationValue, dirs)
+        hyperShard.gatherTests().forEach(::println)
+    }
 }
 
 fun main(args: Array<String>) {
-    checkUsage(args)
-    val annotationName = args[0]
-    val dirs = args.sliceArray(1 until args.size)
-    val processor = RealHyperShard(annotationName, dirs)
-    processor.gatherTests().stream().forEach(::println)
-}
-
-private fun checkUsage(dirs: Array<String>) {
-    check(dirs.isNotEmpty()) {
-        "Usage: " +
-            "java -jar hypershard-x.y.z-all.jar " +
-            "annotationName dir1 dir2 dir3 ..."
-    }
+    HypershardCommand().main(args)
 }

@@ -17,19 +17,14 @@ Snapshots of the development version are available in [Sonatype's `snapshots` re
 Another use case could be to use Hypershard as a dependency in your project
 
 ```groovy
-implementation 'com.dropbox.mobile.hypershard:hypershard:1.0.0'
+implementation 'com.dropbox.mobile.hypershard:hypershard:x.y.z'
 ```
 
 
 # Usage
-The argument is a vararg, you can pass in as many directories as you want, separated by spaces
 ```
-java -jar hypershard-1.0.0.jar $annotation $path
-
-# @param annotation - test class annotation to look for e.g. UiTest
-# @param path - The location of the test classes to parse e.g. /path/to/tests
+java -jar hypershard-*.jar --help
 ```
-The output is a list of fully qualified tests separated by new lines.
 
 Here's an [example Python script](example/run_hypershard.py) that uses Hypershard as a CLI tool.
 
