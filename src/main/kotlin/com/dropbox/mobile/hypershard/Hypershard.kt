@@ -38,6 +38,13 @@ interface HyperShard {
      * @return list of fully qualified test methods [package.class.method]
      */
     fun gatherTests(): List<String>
+
+    /**
+     * Gathers all the Java and Kotlin test files for a set of test directories.
+     *
+     * @return list of files which contain tests
+     */
+    fun gatherTestFiles(): List<File>
 }
 
 /**
@@ -74,6 +81,26 @@ class RealHyperShard(
             }
         }
         return tests
+    }
+
+    /**
+     * @see [HyperShard.gatherTests]
+     */
+    override fun gatherTestFiles(): List<File> {
+        val testFiles = mutableListOf<File>()
+        for (dir in dirs) {
+            val projectDir = File(dir)
+            check(projectDir.exists()) {
+                "Invalid directory: $projectDir"
+            }
+
+            // Get the full list of source files first, so we only walk the directory once
+            val sourceFiles = getFiles(projectDir, ALLOWED_EXTENSIONS)
+            val javaFiles = filterFiles(JAVA_EXTENSION, sourceFiles).filter { isJavaTest(it) }
+            val ktFiles = filterFiles(KOTLIN_EXTENSION, sourceFiles).filter { isKotlinTest(it) }
+            testFiles += javaFiles + ktFiles
+        }
+        return testFiles
     }
 
     /**
@@ -117,9 +144,7 @@ class RealHyperShard(
      * @param file a .java file
      */
     internal fun collectTestsFromJavaFile(file: File): List<String> {
-        check(file.extension == JAVA_EXTENSION) {
-            "Only java files are supported: $file"
-        }
+        checkIsJava(file)
 
         val tests = ArrayList<String>()
         object : VoidVisitorAdapter<Any>() {
@@ -150,6 +175,50 @@ class RealHyperShard(
     }
 
     /**
+     * AST Java parsing to retrieve all the fully qualified test names in a file
+     *
+     * @param file a .java file
+     */
+    internal fun isJavaTest(file: File): Boolean {
+        checkIsJava(file)
+
+        var isTest = false
+        object : VoidVisitorAdapter<Any>() {
+            override fun visit(cu: CompilationUnit, arg: Any?) {
+                if (isTest) {
+                    return
+                }
+                super.visit(cu, arg)
+                val types = cu.types
+                for (type in types) {
+                    val classOrInterfaceDeclaration =
+                        type as? ClassOrInterfaceDeclaration ?: continue
+                    val shouldProcessTestMethod =
+                        shouldProcessTestMethods(classOrInterfaceDeclaration, annotationValue)
+                    if (shouldProcessTestMethod) {
+                        val methods = type.methods
+                        for (method in methods) {
+                            val annotationTest = method.getAnnotationByName("Test")
+                            if (annotationTest.isPresent) {
+                                isTest = true
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+        }.visit(JavaParser.parse(file), null)
+
+        return isTest
+    }
+
+    private fun checkIsJava(file: File) {
+        check(file.extension == JAVA_EXTENSION) {
+            "Only java files are supported: $file"
+        }
+    }
+
+    /**
      * Returns true if we found the class annotation or if's meant to be empty
      */
     private fun shouldProcessTestMethods(
@@ -172,9 +241,7 @@ class RealHyperShard(
      * @param file a .kt file
      */
     internal fun collectTestsFromKotlinFile(file: File): List<String> {
-        check(file.extension == KOTLIN_EXTENSION) {
-            "Only kotlin files are supported: $file"
-        }
+        checkIsKotlin(file)
 
         val tests = ArrayList<String>()
         val parser = Parser()
@@ -212,6 +279,51 @@ class RealHyperShard(
             }
         }
         return tests
+    }
+
+    /**
+     * AST Java parsing to retrieve all the fully qualified test names in a file
+     *
+     * @param file a .kt file
+     */
+    internal fun isKotlinTest(file: File): Boolean {
+        checkIsKotlin(file)
+
+        val parser = Parser()
+        val code = String(Files.readAllBytes(file.toPath()))
+        val ktFile = parser.parsePsiFile(code)
+        val allDeclarations = Arrays.stream(ktFile.children).toList()
+        for (declaration in allDeclarations) {
+            val ktClass = declaration as? KtClass ?: continue
+
+            val shouldProcessTestMethods = shouldProcessTestMethods(ktClass, annotationValue)
+            if (!shouldProcessTestMethods) {
+                continue
+            }
+
+            for (element in declaration.children) {
+                val ktClassBody = element as? KtClassBody ?: continue
+
+                for (fn in ktClassBody.children) {
+                    val ktNamedFunction = fn as? KtNamedFunction ?: continue
+                    // the fqName includes the test name with the full package name and test name
+                    // all delimited by periods, this allows the test to be ran because we need
+                    // the hashtag
+                    for (fnAnnotationEntry in ktNamedFunction.annotationEntries) {
+                        if (fnAnnotationEntry.shortName.toString() == "Test") {
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    private fun checkIsKotlin(file: File) {
+        check(file.extension == KOTLIN_EXTENSION) {
+            "Only kotlin files are supported: $file"
+        }
     }
 
     /**
