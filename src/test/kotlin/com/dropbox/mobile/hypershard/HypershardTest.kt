@@ -33,6 +33,14 @@ class HypershardTest {
             "com.dropbox.android.kotlin.FakeClassTest.emptyTest2"
         )
         private val allTests = expectedUiTests + expectedNonUiTests
+        private val allTestFiles = listOf(
+            File("src/test/resources/com/dropbox/android/java/FakeIgnoredMethodUiTest.java"),
+            File("src/test/resources/com/dropbox/android/java/FakeClassTest.java"),
+            File("src/test/resources/com/dropbox/android/java/FakeIgnoredClassUiTest.java"),
+            File("src/test/resources/com/dropbox/android/kotlin/FakeClassTest.kt"),
+            File("src/test/resources/com/dropbox/android/kotlin/FakeIgnoredClassUiTest.kt"),
+            File("src/test/resources/com/dropbox/android/kotlin/FakeIgnoredMethodUiTest.kt")
+        )
     }
 
     init {
@@ -43,7 +51,7 @@ class HypershardTest {
 
     @Test
     fun `GIVEN hypershard WHEN get all files THEN all are found`() {
-        assertThat(files.size).isEqualTo(6)
+        assertThat(files.size).isEqualTo(8)
     }
 
     @Test
@@ -53,12 +61,12 @@ class HypershardTest {
 
     @Test
     fun `GIVEN files WHEN filter java THEN results found`() {
-        assertThat(hypershard.filterFiles(".java", files).size).isEqualTo(3)
+        assertThat(hypershard.filterFiles(".java", files).size).isEqualTo(4)
     }
 
     @Test
     fun `GIVEN files WHEN filter kt THEN results found`() {
-        assertThat(hypershard.filterFiles(".kt", files).size).isEqualTo(3)
+        assertThat(hypershard.filterFiles(".kt", files).size).isEqualTo(4)
     }
 
     @Test
@@ -91,7 +99,6 @@ class HypershardTest {
 
     @Test
     fun `GIVEN tests WHEN gathering all UiTest THEN tests found`() {
-
         val tests = hypershard.gatherTests()
         assertThat(tests.size).isEqualTo(9)
         assertThat(tests).containsExactlyElementsIn(expectedUiTests)
@@ -99,10 +106,17 @@ class HypershardTest {
 
     @Test
     fun `GIVEN tests WHEN gathering all tests THEN tests found`() {
-        val expectedTests = emptyList<String>()
         val hypershard = RealHyperShard(ClassAnnotationValue.Empty, listOf(resources))
         val tests = hypershard.gatherTests()
         assertThat(tests.size).isEqualTo(13)
         assertThat(tests).containsExactlyElementsIn(allTests)
+    }
+
+    @Test
+    fun `GIVEN tests WHEN gathering all test files THEN tests files found`() {
+        val hypershard = RealHyperShard(ClassAnnotationValue.Empty, listOf(resources))
+        val tests = hypershard.gatherTestFiles()
+        assertThat(tests.size).isEqualTo(6)
+        assertThat(tests).containsExactlyElementsIn(allTestFiles)
     }
 }
