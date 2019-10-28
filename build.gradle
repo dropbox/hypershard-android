@@ -34,11 +34,18 @@ compileTestKotlin {
 }
 
 jar {
-    // Use the shaded jar instead
-    enabled = false
-    dependsOn(shadowJar { archiveClassifier.set(null) })
+    dependsOn(shadowJar)
 
     manifest {
         attributes 'Main-Class': 'com.dropbox.mobile.hypershard.HypershardKt'
     }
+}
+
+shadowJar {
+    classifier = "all"
+}
+
+artifacts {
+    runtime shadowJar
+    archives shadowJar
 }

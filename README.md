@@ -10,7 +10,7 @@ We do this by running tests using [ADB Instrumentation test options](https://dev
 [![Build Status](https://travis-ci.org/dropbox/hypershard-android.svg?branch=master)](https://travis-ci.org/dropbox/hypershard-android)
 
 # Download
-The jar is executable and can be downloaded from [Maven Central](https://search.maven.org/search?q=g:com.dropbox.mobile.hypershard)
+The `all` jar is executable and can be downloaded from [Maven Central](https://search.maven.org/search?q=g:com.dropbox.mobile.hypershard)
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/).
 
@@ -23,7 +23,7 @@ implementation 'com.dropbox.mobile.hypershard:hypershard:1.1.0'
 
 # Usage
 ```
-java -jar hypershard-1.1.0.jar --help
+java -jar hypershard-1.1.0-all.jar --help
 ```
 
 Here's an [example Python script](example/run_hypershard.py) that uses Hypershard as a CLI tool.
@@ -31,12 +31,12 @@ Here's an [example Python script](example/run_hypershard.py) that uses Hypershar
 # Building
 This command will build the jar with dependencies
 ```
-./gradlew shadowJar
+./gradlew install
 ```
 
 # Testing
 ```
-./gradlew test
+./gradlew check
 ```
 
 # Contributing
