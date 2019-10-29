@@ -17,13 +17,13 @@ Snapshots of the development version are available in [Sonatype's `snapshots` re
 Another use case could be to use Hypershard as a dependency in your project
 
 ```groovy
-implementation 'com.dropbox.mobile.hypershard:hypershard:1.1.0'
+implementation 'com.dropbox.mobile.hypershard:hypershard:1.1.1'
 ```
 
 
 # Usage
 ```
-java -jar hypershard-1.1.0-all.jar --help
+java -jar hypershard-1.1.1-all.jar --help
 ```
 
 Here's an [example Python script](example/run_hypershard.py) that uses Hypershard as a CLI tool.
