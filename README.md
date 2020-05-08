@@ -1,3 +1,5 @@
+![Build, Test and Lint](https://github.com/dropbox/hypershard-android/workflows/Build,%20Test%20and%20Lint/badge.svg)
+
 # About
 A fast and easy CLI tool that leverages AST (Abstract Syntax Tree) to parse test files for the purposes of test collection.
 
@@ -6,8 +8,6 @@ Apps that have a significant number of UI tests â€“ like Paper or Dropbox apps â
 At Dropbox, we run Android UI tests separately from JVM tests. Using historical data, we shard our UI tests such that each shard is balanced e.g. each shard ends approximately at the same time.
 
 We do this by running tests using [ADB Instrumentation test options](https://developer.android.com/reference/android/support/test/runner/AndroidJUnitRunner) `-e testFile` where each shard has its own list of tests.
-
-[![Build Status](https://travis-ci.org/dropbox/hypershard-android.svg?branch=master)](https://travis-ci.org/dropbox/hypershard-android)
 
 # Download
 The `all` jar is executable and can be downloaded from [Maven Central](https://search.maven.org/search?q=g:com.dropbox.mobile.hypershard)
