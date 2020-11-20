@@ -33,19 +33,24 @@ class HypershardTest {
             "com.dropbox.android.kotlin.FakeClassTest.emptyTest2"
         )
         private val allTests = expectedUiTests + expectedNonUiTests
-        private val allTestFiles = listOf(
-            File("src/test/resources/com/dropbox/android/java/FakeIgnoredMethodUiTest.java"),
+
+        private val nonUiTestFiles = listOf(
             File("src/test/resources/com/dropbox/android/java/FakeClassTest.java"),
+            File("src/test/resources/com/dropbox/android/kotlin/FakeClassTest.kt")
+        )
+        private val uiTestFiles = listOf(
+            File("src/test/resources/com/dropbox/android/java/FakeIgnoredMethodUiTest.java"),
             File("src/test/resources/com/dropbox/android/java/FakeIgnoredClassUiTest.java"),
-            File("src/test/resources/com/dropbox/android/kotlin/FakeClassTest.kt"),
             File("src/test/resources/com/dropbox/android/kotlin/FakeIgnoredClassUiTest.kt"),
             File("src/test/resources/com/dropbox/android/kotlin/FakeIgnoredMethodUiTest.kt")
         )
+        private val allTestFiles = nonUiTestFiles + uiTestFiles
     }
 
     init {
         val file = File(resources).also { checkNotNull(it.absoluteFile) }
-        hypershard = RealHyperShard(ClassAnnotationValue.Present("UiTest"), listOf(resources))
+        hypershard = RealHyperShard(ClassAnnotationValue.Present("UiTest"),
+            ClassAnnotationValue.Empty, listOf(resources))
         files = hypershard.getFiles(file, ALLOWED_EXTENSIONS)
     }
 
@@ -106,7 +111,8 @@ class HypershardTest {
 
     @Test
     fun `GIVEN tests WHEN gathering all tests THEN tests found`() {
-        val hypershard = RealHyperShard(ClassAnnotationValue.Empty, listOf(resources))
+        val hypershard = RealHyperShard(ClassAnnotationValue.Empty, ClassAnnotationValue.Empty,
+            listOf(resources))
         val tests = hypershard.gatherTests()
         assertThat(tests.size).isEqualTo(13)
         assertThat(tests).containsExactlyElementsIn(allTests)
@@ -114,9 +120,46 @@ class HypershardTest {
 
     @Test
     fun `GIVEN tests WHEN gathering all test files THEN tests files found`() {
-        val hypershard = RealHyperShard(ClassAnnotationValue.Empty, listOf(resources))
+        val hypershard = RealHyperShard(ClassAnnotationValue.Empty, ClassAnnotationValue.Empty,
+            listOf(resources))
         val tests = hypershard.gatherTestFiles()
         assertThat(tests.size).isEqualTo(6)
         assertThat(tests).containsExactlyElementsIn(allTestFiles)
+    }
+
+    @Test
+    fun `GIVEN tests WHEN gathering not UiTests THEN non ui test files found`() {
+        val hypershard = RealHyperShard(ClassAnnotationValue.Empty,
+            ClassAnnotationValue.Present("UiTest"),
+            listOf(resources))
+        val tests = hypershard.gatherTestFiles()
+        assertThat(tests).containsExactlyElementsIn(nonUiTestFiles)
+    }
+
+    @Test
+    fun `GIVEN tests WHEN gathering not UiTests THEN non ui tests found`() {
+        val hypershard = RealHyperShard(ClassAnnotationValue.Empty,
+            ClassAnnotationValue.Present("UiTest"),
+            listOf(resources))
+        val tests = hypershard.gatherTests()
+        assertThat(tests).isEqualTo(expectedNonUiTests)
+    }
+
+    @Test
+    fun `GIVEN tests WHEN gathering not UiTest and UiTest THEN no tests files found`() {
+        val hypershard = RealHyperShard(ClassAnnotationValue.Present("UiTest"),
+            ClassAnnotationValue.Present("UiTest"),
+            listOf(resources))
+        val tests = hypershard.gatherTestFiles()
+        assertThat(tests).isEmpty()
+    }
+
+    @Test
+    fun `GIVEN tests WHEN gathering not UiTests and UiTest THEN no tests found`() {
+        val hypershard = RealHyperShard(ClassAnnotationValue.Present("UiTest"),
+            ClassAnnotationValue.Present("UiTest"),
+            listOf(resources))
+        val tests = hypershard.gatherTests()
+        assertThat(tests).isEmpty()
     }
 }
