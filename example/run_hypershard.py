@@ -7,7 +7,7 @@ if __name__ == "__main__":
     Shows usage of Hypershard as a CLI tool
 
     Input:
-        java -jar hypershard.jar UiTest src/test/resources
+        java -jar hypershard.jar --annotation-name UiTest src/test/resources
     Output:
         com.dropbox.android.java.FakeIgnoredClassTest.emptyTest1
         com.dropbox.android.java.FakeIgnoredClassTest.emptyTest2
