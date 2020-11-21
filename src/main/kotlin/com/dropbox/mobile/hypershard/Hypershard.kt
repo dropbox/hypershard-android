@@ -55,6 +55,7 @@ interface HyperShard {
  */
 class RealHyperShard(
     private val annotationValue: ClassAnnotationValue,
+    private val notAnnotationValue: ClassAnnotationValue,
     private val dirs: List<String>
 ) : HyperShard {
 
@@ -155,7 +156,8 @@ class RealHyperShard(
                     val classOrInterfaceDeclaration =
                         type as? ClassOrInterfaceDeclaration ?: continue
                     val shouldProcessTestMethod =
-                        shouldProcessTestMethods(classOrInterfaceDeclaration, annotationValue)
+                        shouldProcessTestMethods(classOrInterfaceDeclaration, annotationValue,
+                            notAnnotationValue)
                     if (shouldProcessTestMethod) {
                         val methods = type.methods
                         for (method in methods) {
@@ -179,7 +181,7 @@ class RealHyperShard(
      *
      * @param file a .java file
      */
-    internal fun isJavaTest(file: File): Boolean {
+    private fun isJavaTest(file: File): Boolean {
         checkIsJava(file)
 
         var isTest = false
@@ -194,7 +196,8 @@ class RealHyperShard(
                     val classOrInterfaceDeclaration =
                         type as? ClassOrInterfaceDeclaration ?: continue
                     val shouldProcessTestMethod =
-                        shouldProcessTestMethods(classOrInterfaceDeclaration, annotationValue)
+                        shouldProcessTestMethods(classOrInterfaceDeclaration, annotationValue,
+                            notAnnotationValue)
                     if (shouldProcessTestMethod) {
                         val methods = type.methods
                         for (method in methods) {
@@ -223,16 +226,33 @@ class RealHyperShard(
      */
     private fun shouldProcessTestMethods(
         classOrInterfaceDeclaration: ClassOrInterfaceDeclaration,
-        annotationValue: ClassAnnotationValue
+        annotationValue: ClassAnnotationValue,
+        notAnnotationValue: ClassAnnotationValue
     ): Boolean {
-        return when (annotationValue) {
+        val hasAnnotationValue = when (annotationValue) {
             is ClassAnnotationValue.Present -> {
-                val annotationUiTest =
-                    classOrInterfaceDeclaration.getAnnotationByName(annotationValue.annotationName)
-                annotationUiTest.isPresent
+                hasAnnotation(classOrInterfaceDeclaration, annotationValue)
             }
             is ClassAnnotationValue.Empty -> true
         }
+
+        val hasNotAnnotationValue = when (notAnnotationValue) {
+            is ClassAnnotationValue.Present -> {
+                hasAnnotation(classOrInterfaceDeclaration, notAnnotationValue)
+            }
+            is ClassAnnotationValue.Empty -> false
+        }
+
+        return hasAnnotationValue && !hasNotAnnotationValue
+    }
+
+    private fun hasAnnotation(
+        classOrInterfaceDeclaration: ClassOrInterfaceDeclaration,
+        annotationValue: ClassAnnotationValue.Present
+    ): Boolean {
+        val annotationUiTest =
+            classOrInterfaceDeclaration.getAnnotationByName(annotationValue.annotationName)
+        return annotationUiTest.isPresent
     }
 
     /**
@@ -251,7 +271,8 @@ class RealHyperShard(
         for (declaration in allDeclarations) {
             val ktClass = declaration as? KtClass ?: continue
 
-            val shouldProcessTestMethods = shouldProcessTestMethods(ktClass, annotationValue)
+            val shouldProcessTestMethods = shouldProcessTestMethods(ktClass, annotationValue,
+                notAnnotationValue)
             if (!shouldProcessTestMethods) {
                 continue
             }
@@ -296,7 +317,8 @@ class RealHyperShard(
         for (declaration in allDeclarations) {
             val ktClass = declaration as? KtClass ?: continue
 
-            val shouldProcessTestMethods = shouldProcessTestMethods(ktClass, annotationValue)
+            val shouldProcessTestMethods = shouldProcessTestMethods(ktClass, annotationValue,
+                notAnnotationValue)
             if (!shouldProcessTestMethods) {
                 continue
             }
@@ -331,19 +353,35 @@ class RealHyperShard(
      */
     private fun shouldProcessTestMethods(
         ktClass: KtClass,
-        annotationValue: ClassAnnotationValue
+        annotationValue: ClassAnnotationValue,
+        notAnnotationValue: ClassAnnotationValue
     ): Boolean {
-        return when (annotationValue) {
+        val hasAnnotationValue = when (annotationValue) {
             is ClassAnnotationValue.Present -> {
-                for (annotationEntry in ktClass.annotationEntries) {
-                    if (annotationEntry.shortName.toString() == annotationValue.annotationName) {
-                        return true
-                    }
-                }
-                return false
+                hasAnnotation(ktClass, annotationValue)
             }
             is ClassAnnotationValue.Empty -> true
         }
+
+        val hasNotAnnotationValue = when (notAnnotationValue) {
+            is ClassAnnotationValue.Present -> {
+                hasAnnotation(ktClass, notAnnotationValue)
+            }
+            is ClassAnnotationValue.Empty -> false
+        }
+        return hasAnnotationValue && !hasNotAnnotationValue
+    }
+
+    private fun hasAnnotation(
+        ktClass: KtClass,
+        annotationValue: ClassAnnotationValue.Present
+    ): Boolean {
+        for (annotationEntry in ktClass.annotationEntries) {
+            if (annotationEntry.shortName.toString() == annotationValue.annotationName) {
+                return true
+            }
+        }
+        return false
     }
 }
 
@@ -360,6 +398,11 @@ class HypershardCommand :
             "then Hypershard will only process classes annotated with @UiTest."
     )
         .default("")
+    val notAnnotationName by option(
+        help = "Class annotation name *not* to process. For example, if this was set to 'UiTest'," +
+            " then Hypershard will *not* process classes annotated with @UiTest."
+    )
+        .default("")
     val dirs by argument(
         name = "dirs", help = "Dir(s) to process. " +
             "The location of the test classes to parse"
@@ -371,7 +414,11 @@ class HypershardCommand :
             "" -> ClassAnnotationValue.Empty
             else -> ClassAnnotationValue.Present(annotationName)
         }
-        val hyperShard = RealHyperShard(annotationValue, dirs)
+        val notAnnotationValue = when (notAnnotationName) {
+            "" -> ClassAnnotationValue.Empty
+            else -> ClassAnnotationValue.Present(notAnnotationName)
+        }
+        val hyperShard = RealHyperShard(annotationValue, notAnnotationValue, dirs)
         hyperShard.gatherTests().forEach(::println)
     }
 }
