@@ -246,8 +246,10 @@ class RealHyperShard(
         return hasAnnotationValue && !hasNotAnnotationValue
     }
 
-    private fun hasAnnotation(classOrInterfaceDeclaration: ClassOrInterfaceDeclaration,
-        annotationValue: ClassAnnotationValue.Present): Boolean {
+    private fun hasAnnotation(
+        classOrInterfaceDeclaration: ClassOrInterfaceDeclaration,
+        annotationValue: ClassAnnotationValue.Present
+    ): Boolean {
         val annotationUiTest =
             classOrInterfaceDeclaration.getAnnotationByName(annotationValue.annotationName)
         return annotationUiTest.isPresent
@@ -370,7 +372,10 @@ class RealHyperShard(
         return hasAnnotationValue && !hasNotAnnotationValue
     }
 
-    private fun hasAnnotation(ktClass: KtClass, annotationValue: ClassAnnotationValue.Present): Boolean {
+    private fun hasAnnotation(
+        ktClass: KtClass,
+        annotationValue: ClassAnnotationValue.Present
+    ): Boolean {
         for (annotationEntry in ktClass.annotationEntries) {
             if (annotationEntry.shortName.toString() == annotationValue.annotationName) {
                 return true
@@ -394,8 +399,8 @@ class HypershardCommand :
     )
         .default("")
     val notAnnotationName by option(
-        help = "Class annotation name *not* to process. For example, if this was set to 'UiTest', " +
-            "then Hypershard will *not* process classes annotated with @UiTest."
+        help = "Class annotation name *not* to process. For example, if this was set to 'UiTest'," +
+            " then Hypershard will *not* process classes annotated with @UiTest."
     )
         .default("")
     val dirs by argument(
