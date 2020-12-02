@@ -1,4 +1,7 @@
 # Change Log
+## Version 1.1.2 (2020-12-02)
+- Added `-notAnnotation` parameter to ignore classes with an annotation
+
 ## Version 1.1.1 (2019-10-28)
 - Added method to Hypershard to return a list of files with tests
 - Split the jar from the shaded jar
