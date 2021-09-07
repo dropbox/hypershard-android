@@ -13,13 +13,12 @@ import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import java.io.File
-import java.nio.file.Files
-import java.util.Arrays
-import kastree.ast.psi.Parser
-import kotlin.streams.toList
-import org.jetbrains.kotlin.psi.KtClass
-import org.jetbrains.kotlin.psi.KtClassBody
-import org.jetbrains.kotlin.psi.KtNamedFunction
+import kotlinx.ast.common.AstSource
+import kotlinx.ast.common.ast.DefaultAstNode
+import kotlinx.ast.common.klass.KlassDeclaration
+import kotlinx.ast.grammar.kotlin.common.summary
+import kotlinx.ast.grammar.kotlin.common.summary.PackageHeader
+import kotlinx.ast.grammar.kotlin.target.antlr.kotlin.KotlinGrammarAntlrKotlinParser
 
 private const val JAVA_EXTENSION = "java"
 private const val KOTLIN_EXTENSION = "kt"
@@ -264,31 +263,62 @@ class RealHyperShard(
         checkIsKotlin(file)
 
         val tests = ArrayList<String>()
-        val parser = Parser()
-        val code = String(Files.readAllBytes(file.toPath()))
-        val ktFile = parser.parsePsiFile(code)
-        val allDeclarations = Arrays.stream(ktFile.children).toList()
-        for (declaration in allDeclarations) {
-            val ktClass = declaration as? KtClass ?: continue
+        val source = AstSource.File(file.toPath().toString())
+        val parseResult = KotlinGrammarAntlrKotlinParser.parseKotlinFile(source)
+        val allDeclarations = parseResult.summary(attachRawAst = false).get()
 
-            val shouldProcessTestMethods = shouldProcessTestMethods(ktClass, annotationValue,
-                notAnnotationValue)
+        // Find header
+        val classIdentifier = fun (): String {
+            for (declaration in allDeclarations) {
+                val packageHeader = declaration as? PackageHeader ?: continue
+                return packageHeader.identifier.joinToString(separator = ".") { it.identifier }
+            }
+            throw Exception("Expected a PackageHeader attribute in source.")
+        }()
+
+        val ktClasses: List<KlassDeclaration> = allDeclarations.mapNotNull {
+            if (it is KlassDeclaration && it.keyword == "class") {
+                it
+            } else { null }
+        }
+
+        for (ktClass in ktClasses) {
+            val shouldProcessTestMethods = shouldProcessTestMethods(
+                    ktClass,
+                    annotationValue,
+                    notAnnotationValue
+            )
+
             if (!shouldProcessTestMethods) {
                 continue
             }
 
-            for (element in declaration.children) {
-                val ktClassBody = element as? KtClassBody ?: continue
+            for (element in ktClass.children) {
+                if ((element as? DefaultAstNode)?.description != "classBody") {
+                    continue
+                }
 
-                for (fn in ktClassBody.children) {
-                    val ktNamedFunction = fn as? KtNamedFunction ?: continue
+                for (fn in element.children) {
+                    val maybeDeclaration = fn as? KlassDeclaration
+                    if(maybeDeclaration?.keyword != "fun"
+                            && maybeDeclaration?.identifier != null
+                            && ktClass.identifier != null) {
+                        continue
+                    }
+                    val ktNamedFunction: KlassDeclaration = fn as KlassDeclaration
+
                     // the fqName includes the test name with the full package name and test name
                     // all delimited by periods, this allows the test to be ran because we need
                     // the hashtag
-                    val fqName = fn.fqName.toString()
+                    val fqName = arrayOf(
+                            classIdentifier,
+                            ktClass.identifier?.identifier,
+                            ktNamedFunction.identifier?.identifier
+                    ).joinToString(separator = ".")
+
                     var methodTestFound = false
-                    for (fnAnnotationEntry in ktNamedFunction.annotationEntries) {
-                        if (fnAnnotationEntry.shortName.toString() == "Test") {
+                    for (fnAnnotationEntry in ktNamedFunction.annotations) {
+                        if (fnAnnotationEntry.identifier.first().identifier == "Test") {
                             methodTestFound = true
                             break
                         }
@@ -310,12 +340,15 @@ class RealHyperShard(
     internal fun isKotlinTest(file: File): Boolean {
         checkIsKotlin(file)
 
-        val parser = Parser()
-        val code = String(Files.readAllBytes(file.toPath()))
-        val ktFile = parser.parsePsiFile(code)
-        val allDeclarations = Arrays.stream(ktFile.children).toList()
+        val source = AstSource.File(file.toPath().toString())
+        val parseResult = KotlinGrammarAntlrKotlinParser.parseKotlinFile(source)
+        val allDeclarations = parseResult.summary(attachRawAst = false).get()
+
         for (declaration in allDeclarations) {
-            val ktClass = declaration as? KtClass ?: continue
+            val ktClass = declaration as? KlassDeclaration ?: continue
+            if (ktClass.keyword != "class") {
+                continue
+            }
 
             val shouldProcessTestMethods = shouldProcessTestMethods(ktClass, annotationValue,
                 notAnnotationValue)
@@ -324,15 +357,21 @@ class RealHyperShard(
             }
 
             for (element in declaration.children) {
-                val ktClassBody = element as? KtClassBody ?: continue
+                val ktClassBody = element as? DefaultAstNode ?: continue
+                if (ktClassBody.description != "classBody") {
+                    continue
+                }
 
                 for (fn in ktClassBody.children) {
-                    val ktNamedFunction = fn as? KtNamedFunction ?: continue
+                    val ktNamedFunction = fn as? KlassDeclaration ?: continue
+                    if (ktNamedFunction.keyword != "fun") {
+                        continue
+                    }
                     // the fqName includes the test name with the full package name and test name
                     // all delimited by periods, this allows the test to be ran because we need
                     // the hashtag
-                    for (fnAnnotationEntry in ktNamedFunction.annotationEntries) {
-                        if (fnAnnotationEntry.shortName.toString() == "Test") {
+                    for (fnAnnotationEntry in ktNamedFunction.annotations) {
+                        if (fnAnnotationEntry.identifier.first().identifier == "Test") {
                             return true
                         }
                     }
@@ -352,7 +391,7 @@ class RealHyperShard(
      * Returns true if we found the class annotation or if's meant to be empty
      */
     private fun shouldProcessTestMethods(
-        ktClass: KtClass,
+        ktClass: KlassDeclaration,
         annotationValue: ClassAnnotationValue,
         notAnnotationValue: ClassAnnotationValue
     ): Boolean {
@@ -373,11 +412,11 @@ class RealHyperShard(
     }
 
     private fun hasAnnotation(
-        ktClass: KtClass,
+        ktClass: KlassDeclaration,
         annotationValue: ClassAnnotationValue.Present
     ): Boolean {
-        for (annotationEntry in ktClass.annotationEntries) {
-            if (annotationEntry.shortName.toString() == annotationValue.annotationName) {
+        for (annotationEntry in ktClass.annotations) {
+            if (annotationEntry.identifier.first().identifier == annotationValue.annotationName) {
                 return true
             }
         }

@@ -7,6 +7,7 @@ plugins {
 }
 
 repositories {
+    maven { url 'https://jitpack.io' }
     mavenCentral()
     google()
     jcenter()
@@ -19,11 +20,13 @@ ktlint {
 dependencies {
     // This includes the kotlin runtime in to the fat jar
     implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.6.25'
-    implementation 'com.github.cretz.kastree:kastree-ast-psi:0.4.0'
-    implementation 'com.github.ajalt:clikt:2.6.0'
+    implementation "com.github.kotlinx.ast:grammar-kotlin-parser-antlr-kotlin:bf1da05656"
+    implementation 'com.github.ajalt.clikt:clikt:3.1.0'
     testImplementation  "junit:junit:4.13"
     testImplementation "com.google.truth:truth:1.0.1"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:1.4.20"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:1.4.20"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-common:1.4.20"
 }
 
 compileKotlin {
