@@ -300,9 +300,9 @@ class RealHyperShard(
 
                 for (fn in element.children) {
                     val maybeDeclaration = fn as? KlassDeclaration
-                    if(maybeDeclaration?.keyword != "fun"
-                            && maybeDeclaration?.identifier != null
-                            && ktClass.identifier != null) {
+                    if (maybeDeclaration?.keyword != "fun" &&
+                            maybeDeclaration?.identifier != null &&
+                            ktClass.identifier != null) {
                         continue
                     }
                     val ktNamedFunction: KlassDeclaration = fn as KlassDeclaration
@@ -318,7 +318,7 @@ class RealHyperShard(
 
                     var methodTestFound = false
                     for (fnAnnotationEntry in ktNamedFunction.annotations) {
-                        if (fnAnnotationEntry.identifier.first().identifier == "Test") {
+                        if (fnAnnotationEntry.identifier.firstOrNull()?.identifier == "Test") {
                             methodTestFound = true
                             break
                         }
@@ -371,7 +371,7 @@ class RealHyperShard(
                     // all delimited by periods, this allows the test to be ran because we need
                     // the hashtag
                     for (fnAnnotationEntry in ktNamedFunction.annotations) {
-                        if (fnAnnotationEntry.identifier.first().identifier == "Test") {
+                        if (fnAnnotationEntry.identifier.firstOrNull()?.identifier == "Test") {
                             return true
                         }
                     }
@@ -416,7 +416,8 @@ class RealHyperShard(
         annotationValue: ClassAnnotationValue.Present
     ): Boolean {
         for (annotationEntry in ktClass.annotations) {
-            if (annotationEntry.identifier.first().identifier == annotationValue.annotationName) {
+            if (annotationEntry.identifier.firstOrNull()?.identifier ==
+                    annotationValue.annotationName) {
                 return true
             }
         }

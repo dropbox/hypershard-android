@@ -20,13 +20,23 @@ ktlint {
 dependencies {
     // This includes the kotlin runtime in to the fat jar
     implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.6.25'
-    implementation "com.github.kotlinx.ast:grammar-kotlin-parser-antlr-kotlin:bf1da05656"
     implementation 'com.github.ajalt.clikt:clikt:3.1.0'
     testImplementation  "junit:junit:4.13"
     testImplementation "com.google.truth:truth:1.0.1"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:1.4.20"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:1.4.20"
     testImplementation "org.jetbrains.kotlin:kotlin-test-common:1.4.20"
+
+    // Source: https://github.com/kotlinx/ast
+    // This includes the compiled libraries for 
+    // com.github.kotlinx.ast:grammar-kotlin-parser-antlr-kotlin:bf1da05656;
+    // It's included largely because there are no published packages for it outside
+    // of jitpack.
+    implementation files("libs/common-jvm-bf1da05656.jar")
+    implementation files("libs/grammar-kotlin-parser-antlr-kotlin-jvm-bf1da05656.jar")
+    implementation files("libs/grammar-kotlin-parser-common-jvm-bf1da05656.jar")
+    implementation files("libs/parser-antlr-kotlin-jvm-bf1da05656.jar")
+    implementation files("libs/antlr-kotlin-runtime-jvm-710f0f8b7f.jar")
 }
 
 compileKotlin {
