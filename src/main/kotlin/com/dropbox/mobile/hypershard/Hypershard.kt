@@ -273,7 +273,7 @@ class RealHyperShard(
                 val packageHeader = declaration as? PackageHeader ?: continue
                 return packageHeader.identifier.joinToString(separator = ".") { it.identifier }
             }
-            throw Exception("Expected a PackageHeader attribute in source.")
+            throw IllegalArgumentException("Expected a PackageHeader attribute in source.")
         }()
 
         val ktClasses: List<KlassDeclaration> = allDeclarations.mapNotNull {
