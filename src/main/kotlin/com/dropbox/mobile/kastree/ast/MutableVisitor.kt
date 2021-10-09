@@ -322,17 +322,17 @@ open class MutableVisitor {
         }
     }
 
-    protected inline fun <T : Node?> Node?.visitChildren(v: T, ch: ChangedRef): T = visit(v, this!!, ch)
+    private fun <T : Node?> Node?.visitChildren(v: T, ch: ChangedRef): T = visit(v, this!!, ch)
 
-    protected inline fun <T : Node?> Node?.visitChildren(v: List<T>, ch: ChangedRef): List<T> = ch.sub { newCh ->
+    private fun <T : Node?> Node?.visitChildren(v: List<T>, ch: ChangedRef): List<T> = ch.sub { newCh ->
         val newList = v.map { orig -> visit(orig, this!!, newCh).also { newCh.markIf(it, orig) } }
         newList.origOrChanged(v, newCh)
     }
 
-    protected inline fun <T> T.origOrChanged(orig: T, ref: ChangedRef) = if (ref.changed) this else orig
+    private fun <T> T.origOrChanged(orig: T, ref: ChangedRef) = if (ref.changed) this else orig
 
     open class ChangedRef(var changed: Boolean) {
-        inline fun markIf(v1: Any?, v2: Any?) { if (v1 !== v2) changed = true }
+        fun markIf(v1: Any?, v2: Any?) { if (v1 !== v2) changed = true }
 
         open fun <T> sub(fn: (ChangedRef) -> T): T = ChangedRef(false).let { newCh ->
             fn(newCh).also { if (newCh.changed) changed = true }

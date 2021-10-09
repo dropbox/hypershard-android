@@ -2,7 +2,7 @@ package com.dropbox.mobile.kastree.ast.psi
 
 import com.dropbox.mobile.kastree.ast.ExtrasMap
 import com.dropbox.mobile.kastree.ast.Node
-import java.util.*
+import java.util.IdentityHashMap
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.PsiComment
@@ -10,8 +10,10 @@ import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.com.intellij.psi.PsiWhiteSpace
 import org.jetbrains.kotlin.descriptors.annotations.AnnotationUseSiteTarget
 import org.jetbrains.kotlin.lexer.KtTokens
+/* ktlint-disable no-wildcard-imports */
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.*
+/* ktlint-enable no-wildcard-imports */
 
 open class Converter {
     protected open fun onNode(node: Node, elem: PsiElement) { }
