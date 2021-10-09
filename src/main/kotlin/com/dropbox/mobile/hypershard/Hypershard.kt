@@ -3,6 +3,7 @@
  */
 package com.dropbox.mobile.hypershard
 
+import com.dropbox.mobile.kastree.ast.psi.Parser
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
@@ -15,7 +16,6 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import java.io.File
 import java.nio.file.Files
 import java.util.Arrays
-import kastree.ast.psi.Parser
 import kotlin.streams.toList
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassBody

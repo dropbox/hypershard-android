@@ -48,7 +48,7 @@ class HypershardTest {
     }
 
     init {
-        val file = File(resources).also { checkNotNull(it.absoluteFile) }
+        val file = File(resources + "/com/dropbox/android").also { checkNotNull(it.absoluteFile) }
         hypershard = RealHyperShard(ClassAnnotationValue.Present("UiTest"),
             ClassAnnotationValue.Empty, listOf(resources))
         files = hypershard.getFiles(file, ALLOWED_EXTENSIONS)
