@@ -2,14 +2,14 @@ package com.dropbox.mobile.kastree.ast.psi
 
 import com.dropbox.mobile.kastree.ast.Node
 import com.dropbox.mobile.kastree.ast.Writer
+import java.util.IdentityHashMap
+import kotlin.test.assertEquals
 import org.jetbrains.kotlin.com.intellij.openapi.util.text.StringUtilRt
 import org.jetbrains.kotlin.com.intellij.psi.PsiElement
 import org.junit.Assume
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.util.*
-import kotlin.test.assertEquals
 
 @RunWith(Parameterized::class)
 class CorpusTest(private val unit: Corpus.Unit) {
@@ -59,7 +59,7 @@ class CorpusTest(private val unit: Corpus.Unit) {
         @JvmStatic @Parameterized.Parameters(name = "{0}")
         fun data(): List<Any> = Corpus.default
             // Uncomment to test a specific file
-            //.filter { it.relativePath.toString().endsWith("list\\basic.kt") }
+            // .filter { it.relativePath.toString().endsWith("list\\basic.kt") }
 
         // Good for quick testing
 //        @JvmStatic @Parameterized.Parameters(name = "{0}")

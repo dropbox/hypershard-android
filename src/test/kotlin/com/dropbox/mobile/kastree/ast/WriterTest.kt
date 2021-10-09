@@ -1,8 +1,8 @@
 package com.dropbox.mobile.kastree.ast
 
 import com.dropbox.mobile.kastree.ast.psi.Parser
-import org.junit.Test
 import kotlin.test.assertEquals
+import org.junit.Test
 
 class WriterTest {
     @Test
@@ -47,8 +47,5 @@ class WriterTest {
             code.trim(),
             Writer.write(identityNode).trim(),
             "Parse -> Identity Transform -> Write for $code, failed")
-
-
     }
-
 }

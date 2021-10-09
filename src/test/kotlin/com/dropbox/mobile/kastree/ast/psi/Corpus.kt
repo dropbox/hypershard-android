@@ -22,7 +22,7 @@ object Corpus {
             loadTestDataFromDir(
                     Paths.get(System.getenv("KOTLIN_REPO"),
                             "compiler/testData/psi"
-            ).also { require(Files.isDirectory(it)) { "Dir not found at $it" }})
+            ).also { require(Files.isDirectory(it)) { "Dir not found at $it" } })
         }
     }
 
