@@ -55,7 +55,8 @@ interface HyperShard {
 class RealHyperShard(
     private val annotationValue: ClassAnnotationValue,
     private val notAnnotationValue: ClassAnnotationValue,
-    private val dirs: List<String>
+    private val dirs: List<String>,
+    private val javaParser: JavaParser = JavaParser()
 ) : HyperShard {
 
     /**
@@ -155,22 +156,25 @@ class RealHyperShard(
                     val classOrInterfaceDeclaration =
                         type as? ClassOrInterfaceDeclaration ?: continue
                     val shouldProcessTestMethod =
-                        shouldProcessTestMethods(classOrInterfaceDeclaration, annotationValue,
-                            notAnnotationValue)
+                        shouldProcessTestMethods(
+                            classOrInterfaceDeclaration, annotationValue,
+                            notAnnotationValue
+                        )
                     if (shouldProcessTestMethod) {
                         val methods = type.methods
                         for (method in methods) {
                             val annotationTest = method.getAnnotationByName("Test")
                             if (annotationTest.isPresent) {
-                                tests.add("${cu.packageDeclaration.get().name}." +
-                                    "${type.name}.${method.name}"
+                                tests.add(
+                                    "${cu.packageDeclaration.get().name}." +
+                                        "${type.name}.${method.name}"
                                 )
                             }
                         }
                     }
                 }
             }
-        }.visit(JavaParser.parse(file), null)
+        }.visit(javaParser.parse(file).result.orElseThrow(), null)
 
         return tests
     }
@@ -209,7 +213,7 @@ class RealHyperShard(
                     }
                 }
             }
-        }.visit(JavaParser.parse(file), null)
+        }.visit(javaParser.parse(file).result.orElseThrow(), null)
 
         return isTest
     }
