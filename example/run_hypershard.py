@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     if not os.path.isfile(file_name):
         url_opener = urllib.URLopener()
-        url_opener.retrieve("https://oss.sonatype.org/service/local/repositories/releases/content/com/dropbox/mobile/hypershard/hypershard/1.1.0/hypershard-1.1.0.jar", file_name)
+        url_opener.retrieve("https://oss.sonatype.org/service/local/repositories/releases/content/com/dropbox/mobile/hypershard/hypershard/1.1.3/hypershard-1.1.3.jar", file_name)
 
     hypershard_command = "java -jar hypershard.jar --annotation-name UiTest src/test/resources"
     print "Input: \n", hypershard_command
